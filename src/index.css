@@ -1,0 +1,20 @@
+/* Replace this with proper CSS comments */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-primary: 26 115 232;
+    --color-secondary: 124 77 255;
+  }
+
+  body {
+    @apply bg-white text-neutral-900 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  /* Rest of your CSS */
+}
