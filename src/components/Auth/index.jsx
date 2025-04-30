@@ -22,7 +22,7 @@ const Auth = () => {
                 component="h1" 
                 className="font-bold bg-gradient-to-r from-gray-800 to-gray-600 text-transparent bg-clip-text"
               >
-                emotiSense
+                EmoSense
               </Typography>
               <span className="text-xs font-medium tracking-wider text-gray-500 uppercase">
                 Classroom Analytics
@@ -42,7 +42,7 @@ const Auth = () => {
               </svg>
             </div>
             <Typography variant="h6" component="h2" className="text-white font-medium relative z-10">
-              {tab === 0 ? 'Welcome Back' : 'Join emotiSense'}
+              {tab === 0 ? 'Welcome Back' : 'Join EmoSense'}
             </Typography>
             <Typography variant="body2" className="text-primary-100 mt-1 relative z-10">
               {tab === 0 ? 'Sign in to continue to your dashboard' : 'Create an account to get started'}

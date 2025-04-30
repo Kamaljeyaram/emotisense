@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, Typography, Chip, Divider } from '@mui/material';
+import Webcam from 'react-webcam';
 import { 
   ArrowUpward, ArrowDownward, BarChart, People, Timer, Psychology,
   VideocamOff, Videocam, Settings, InsertEmoticon
@@ -23,6 +24,12 @@ const ClassroomAnalytics = () => {
   });
   const [cameraEnabled, setCameraEnabled] = useState(false);
   
+  // Inside the ClassroomAnalytics component
+  const webcamRef = useRef(null);
+  const [cameraLoading, setCameraLoading] = useState(false);
+  // Add a new state for camera errors
+  const [cameraError, setCameraError] = useState(null);
+
   // Maps emotion names to colors and emojis
   const emotionMeta = {
     happy: { color: 'bg-green-100 text-green-600', emoji: '😊', gradient: 'from-green-500 to-green-600' },
@@ -92,7 +99,24 @@ const ClassroomAnalytics = () => {
   };
 
   const handleToggleCamera = () => {
-    setCameraEnabled(prev => !prev);
+    if (!cameraEnabled) {
+      setCameraLoading(true);
+      // When enabling camera, set a short timeout to simulate loading
+      setTimeout(() => {
+        setCameraEnabled(true);
+        setCameraLoading(false);
+      }, 1000);
+    } else {
+      setCameraEnabled(false);
+    }
+  };
+
+  // Add this inside the camera UI section to handle errors
+  const handleCameraError = (error) => {
+    console.error('Camera error:', error);
+    setCameraError('Could not access camera. Please check permissions.');
+    setCameraEnabled(false);
+    setCameraLoading(false);
   };
 
   if (error) {
@@ -130,7 +154,7 @@ const ClassroomAnalytics = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Navbar 
-        title="emotiSense" 
+        title="EmoSense" 
         subtitle={`${deptFullName} - Section ${section}`}
       />
       
@@ -344,12 +368,20 @@ const ClassroomAnalytics = () => {
               <div className="aspect-video md:aspect-[16/9] flex items-center justify-center w-full bg-gray-900 relative">
                 {cameraEnabled ? (
                   <div className="w-full h-full bg-gray-800 flex items-center justify-center relative">
-                    {/* Mock camera feed */}
-                    <div className="w-full h-full bg-gradient-to-b from-gray-800 to-gray-900 flex items-center justify-center">
-                      <Typography variant="body1" className="text-gray-500">
-                        Camera feed simulation
-                      </Typography>
-                    </div>
+                    {/* Real webcam feed */}
+                    <Webcam
+                      audio={false}
+                      ref={webcamRef}
+                      screenshotFormat="image/jpeg"
+                      className="w-full h-full object-cover"
+                      videoConstraints={{
+                        width: 1280,
+                        height: 720,
+                        facingMode: "user"
+                      }}
+                      onUserMediaError={handleCameraError}
+                      onUserMedia={() => setCameraError(null)}
+                    />
                     
                     {/* Emotion indicators */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
@@ -374,19 +406,36 @@ const ClassroomAnalytics = () => {
                   </div>
                 ) : (
                   <div className="text-center text-gray-400 p-8 flex flex-col items-center">
-                    <VideocamOff className="text-gray-500 text-5xl mb-4" />
-                    <Typography variant="h6" className="text-gray-400 mb-2">
-                      Camera feed unavailable
-                    </Typography>
-                    <Typography variant="body2" className="text-gray-500 mb-4 max-w-md">
-                      Enable the camera to start monitoring classroom emotions in real-time
-                    </Typography>
-                    <button 
-                      onClick={handleToggleCamera}
-                      className="px-6 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg text-sm font-medium shadow-lg shadow-primary-900/20 hover:shadow-primary-900/30 transition-all"
-                    >
-                      Enable Camera
-                    </button>
+                    {cameraLoading ? (
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 border-t-4 border-primary-500 border-solid rounded-full animate-spin mb-4"></div>
+                        <Typography variant="body1" className="text-gray-400">
+                          Initializing camera...
+                        </Typography>
+                      </div>
+                    ) : (
+                      <>
+                        <VideocamOff className="text-gray-500 text-5xl mb-4" />
+                        <Typography variant="h6" className="text-gray-400 mb-2">
+                          Camera feed unavailable
+                        </Typography>
+                        {cameraError ? (
+                          <Typography variant="body2" className="text-red-400 mb-4 max-w-md text-center">
+                            {cameraError}
+                          </Typography>
+                        ) : (
+                          <Typography variant="body2" className="text-gray-500 mb-4 max-w-md">
+                            Enable the camera to start monitoring classroom emotions in real-time
+                          </Typography>
+                        )}
+                        <button 
+                          onClick={handleToggleCamera}
+                          className="px-6 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg text-sm font-medium shadow-lg shadow-primary-900/20 hover:shadow-primary-900/30 transition-all"
+                        >
+                          Enable Camera
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
